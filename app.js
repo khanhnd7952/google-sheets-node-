@@ -1,4 +1,5 @@
 const express = require("express");
+var queue = require('express-queue');
 const { google } = require("googleapis");
 
 const app = express();
@@ -7,13 +8,17 @@ app.set("view engine", "ejs");
 app.engine('ejs', require('ejs').__express);
 //app.set('views', '/views')
 app.use(express.urlencoded({ extended: true }));
+app.use(queue({ activeLimit: 1, queuedLimit: -1 }));
 
 app.get("/", (req, res) => {
   res.render("index");
 });
 
 app.post("/", async (req, res) => {
-  const { request, name } = req.body;
+
+  console.log(req.body);
+
+  const { name, request, request2 } = req.body;
 
   const auth = new google.auth.GoogleAuth({
     keyFile: "credentials.json",
@@ -38,36 +43,41 @@ app.post("/", async (req, res) => {
   const getRows = await googleSheets.spreadsheets.values.get({
     auth,
     spreadsheetId,
-    range: "Sheet1!A:C",
+    range: "Sheet1!K1",
   });
+  console.log(getRows.data);
 
-  let v1 = getRows.data.values;
-  let oldLength = v1.length;
-  console.log("old length: " + oldLength);
+  let currentIndex = getRows.data.values[0][0];
+  console.log("Số thứ tự hiện tại: " + currentIndex);
+  currentIndex++;
 
-  console.log(v1[oldLength-1]);
-  let oldIndex = v1[oldLength-1][0];
 
-  console.log("old index: " + oldIndex);
-  oldIndex++;
-
+  let date_ob = new Date();
+  let converted = date_ob.toLocaleString("en-US", { timeZone: "Asia/Saigon" });
 
   // Write row(s) to spreadsheet
   await googleSheets.spreadsheets.values.append({
     auth,
     spreadsheetId,
-    range: "Sheet1!A:B",
+    range: "Sheet1!A:E",
     valueInputOption: "USER_ENTERED",
     resource: {
-      values: [[oldIndex, name, request]],
+      values: [[converted, currentIndex, name, request, request2]],
     },
   });
 
+  // update stt
+  await await googleSheets.spreadsheets.values.update({
+    auth,
+    spreadsheetId,
+    range: "Sheet1!K1",
+    valueInputOption: "USER_ENTERED",
+    resource: {
+      values: [[currentIndex]],
+    },
+  })
 
-
-  //res.send(count);
-  //res.send(getRows.data.values[count-1].data);
-  res.send("Số thứ tự của bạn là: " + oldIndex);
+  res.send("Số thứ tự của bạn là: " + currentIndex);
 });
 
 app.listen(1337, (req, res) => console.log("running on 1337"));
