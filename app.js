@@ -3,6 +3,9 @@ var queue = require("express-queue");
 const { google } = require("googleapis");
 
 const app = express();
+
+const spreadsheetId = "1TXxhmTg8vpEhft_ckHqPnGYXrRD1v9Fidpdu8bzIWMg";
+
 //app.engine('ejs', require('ejs').express);
 app.set("view engine", "ejs");
 app.engine("ejs", require("ejs").__express);
@@ -10,9 +13,10 @@ app.engine("ejs", require("ejs").__express);
 app.use(express.urlencoded({ extended: true }));
 app.use(queue({ activeLimit: 1, queuedLimit: -1 }));
 
-// app.get("/", (req, res) => {
-//   res.render("HDGD");
-// });
+app.get("/", (req, res) => {
+  let quote = ["asd", "zxc"];
+  res.render("index", { result: "asd" });
+});
 
 app.get("/HDGD", (req, res) => {
   res.render("HDGD");
@@ -37,8 +41,6 @@ app.post("/HDGD", async (req, res) => {
 
   // Instance of Google Sheets API
   const googleSheets = google.sheets({ version: "v4", auth: client });
-
-  const spreadsheetId = "1DYOsvFwZwz5b15OH257EbP66HVUMeFQ6IvmWOqhObAs";
 
   const sheetName = "HĐ, GD";
   // Get metadata about spreadsheet
@@ -86,7 +88,9 @@ app.post("/HDGD", async (req, res) => {
     },
   });
 
-  res.send("Số thứ tự của bạn là: " + currentIndex);
+  // res.send("Số thứ tự của bạn là: " + currentIndex);
+
+  res.render("result", { result: currentIndex });
 });
 
 //---------------------------------------------------CTCK-----------------------------------------------------
@@ -105,8 +109,6 @@ app.post("/CTCK", async (req, res) => {
 
   // Instance of Google Sheets API
   const googleSheets = google.sheets({ version: "v4", auth: client });
-
-  const spreadsheetId = "1DYOsvFwZwz5b15OH257EbP66HVUMeFQ6IvmWOqhObAs";
 
   const sheetName = "CTCK";
   // Get metadata about spreadsheet
@@ -152,9 +154,10 @@ app.post("/CTCK", async (req, res) => {
     },
   });
 
-  res.send("Số thứ tự của bạn là: " + currentIndex);
-});
+  // res.send("Số thứ tự của bạn là: " + currentIndex);
 
+  res.render("result", { result: currentIndex });
+});
 
 const PORT = process.env.PORT || 3000;
 
