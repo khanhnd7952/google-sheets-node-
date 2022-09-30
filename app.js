@@ -151,4 +151,4 @@ app.post("/CTCK", async (req, res) => {
   res.send("Số thứ tự của bạn là: " + currentIndex);
 });
 
-app.listen(3000, (req, res) => console.log("running on 1337"));
+app.listen(process.env.PORT || 3000, (req, res) => console.log("running on 1337"));
