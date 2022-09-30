@@ -10,9 +10,9 @@ app.engine("ejs", require("ejs").__express);
 app.use(express.urlencoded({ extended: true }));
 app.use(queue({ activeLimit: 1, queuedLimit: -1 }));
 
-app.get("/", (req, res) => {
-  res.render("HDGD");
-});
+// app.get("/", (req, res) => {
+//   res.render("HDGD");
+// });
 
 app.get("/HDGD", (req, res) => {
   res.render("HDGD");
