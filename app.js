@@ -1,6 +1,7 @@
 const express = require("express");
 var queue = require("express-queue");
 const { google } = require("googleapis");
+const localStorage = require("node-localstorage")
 
 const app = express();
 
@@ -15,21 +16,92 @@ app.use(queue({ activeLimit: 1, queuedLimit: -1 }));
 
 app.get("/", (req, res) => {
   let quote = ["asd", "zxc"];
-  res.render("index", { result: "asd" });
+  res.render("login", { result: "asd" });
 });
 
 app.get("/HDGD", (req, res) => {
+  console.log(req.body);
   res.render("HDGD");
 });
 
 app.get("/CTCK", (req, res) => {
   res.render("CTCK");
 });
+
+//---------------------------------------------------Login-----------------------------------------------------
+app.post("/", async (req, res) => {
+  console.log(req.body);
+  const { field1, field2 } = req.body;
+
+  const auth = new google.auth.GoogleAuth({
+    keyFile: "credentials.json",
+    scopes: "https://www.googleapis.com/auth/spreadsheets",
+  });
+
+  // Create client instance for auth
+  const client = await auth.getClient();
+
+  // Instance of Google Sheets API
+  const googleSheets = google.sheets({ version: "v4", auth: client });
+
+  const sheetName = "Account";
+  // Get metadata about spreadsheet
+  const metaData = await googleSheets.spreadsheets.get({
+    auth,
+    spreadsheetId,
+  });
+
+  // Read rows from spreadsheet
+  const getRows = await googleSheets.spreadsheets.values.get({
+    auth,
+    spreadsheetId,
+    range: sheetName + "!A:B",
+  });
+
+
+  let data = getRows.data.values;
+  console.log(data);
+
+  data.forEach(element => {
+    if (field1 == element[0]) {
+      if (field2 == element[1]) {
+        res.render("index", { id: field1 });
+      }
+      else {
+        console.log("Sai mật khẩu");
+        res.send("Sai mật khẩu");
+      }
+    }
+  });
+  // if (typeof localStorage === "undefined" || localStorage === null) {
+  //   var LocalStorage = require('node-localstorage').LocalStorage;
+  //   localStorage = new LocalStorage('./scratch');
+  // }
+  
+  // localStorage.setItem('myFirstKey', 'myFirstValue');
+  // console.log(localStorage.getItem('myFirstKey'));
+
+  Storage.setItem('myFirstKey', 'myFirstValue');
+  console.log(Storage.getItem('myFirstKey'));
+  //localStorage.setItem("id", field1);
+
+  console.log("Sai tài khoản");
+  res.send("Sai tài khoản");
+
+  //res.render("result", { result: currentIndex });
+});
+
+
+
+
+
 //---------------------------------------------------HDGD-----------------------------------------------------
 app.post("/HDGD", async (req, res) => {
+  console.log(localStorage.getItem("id"));
+
   console.log(req.body);
 
-  const { field1, field2, field3, field4, field5 } = req.body;
+  const { account, field1, field2, field3, field4, field5 } = req.body;
 
   const auth = new google.auth.GoogleAuth({
     keyFile: "credentials.json",
@@ -72,7 +144,7 @@ app.post("/HDGD", async (req, res) => {
     valueInputOption: "USER_ENTERED",
     resource: {
       values: [
-        [converted, currentIndex, field1, field2, field3, field4, field5],
+        [converted, currentIndex, field1, field2, field3, field4, field5, account],
       ],
     },
   });
@@ -97,7 +169,7 @@ app.post("/HDGD", async (req, res) => {
 app.post("/CTCK", async (req, res) => {
   console.log(req.body);
 
-  const { field1, field3, field4, field5 } = req.body;
+  const { account, field1, field3, field4, field5 } = req.body;
 
   const auth = new google.auth.GoogleAuth({
     keyFile: "credentials.json",
@@ -139,7 +211,7 @@ app.post("/CTCK", async (req, res) => {
     range: sheetName + "!A:F",
     valueInputOption: "USER_ENTERED",
     resource: {
-      values: [[converted, currentIndex, field1, field3, field4, field5]],
+      values: [[converted, currentIndex, field1, field3, field4, field5, account]],
     },
   });
 
